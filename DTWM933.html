@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager</title>
+    <style>
+        /* Background styling */
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #333;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        /* Title styling */
+        h1 {
+            color: #fff;
+            font-size: 2.5em;
+            margin-top: 20px;
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+            animation: fadeIn 2s ease-in-out;
+        }
+
+        /* Input fields styling */
+        .input-group {
+            margin: 10px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            color: #fff;
+            font-weight: bold;
+            width: 300px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: none;
+            border-radius: 5px;
+            outline: none;
+            font-size: 1em;
+        }
+
+        button {
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            font-size: 1em;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: transform 0.2s ease, background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #ff4757;
+            transform: scale(1.05);
+        }
+
+        /* Task list styling */
+        #taskList {
+            list-style-type: none;
+            padding: 0;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .task {
+            background: #fefefe;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .task-details {
+            margin: 5px 0;
+        }
+
+        .delete-button {
+            align-self: flex-end;
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.2s ease, background-color 0.3s ease;
+        }
+
+        .delete-button:hover {
+            background-color: #ff4757;
+            transform: scale(1.1);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Task Manager</h1>
+
+    <div class="input-group">
+        <label for="taskInput">Task Name:</label>
+        <input type="text" id="taskInput" placeholder="Enter task name">
+    </div>
+    <div class="input-group">
+        <label for="descriptionInput">Description:</label>
+        <input type="text" id="descriptionInput" placeholder="Enter task description">
+    </div>
+    <div class="input-group">
+        <label for="deadlineInput">Deadline:</label>
+        <input type="date" id="deadlineInput">
+    </div>
+    <div class="input-group">
+        <label for="priorityInput">Priority:</label>
+        <select id="priorityInput">
+            <option value="Low">Low</option>
+            <option value="Medium">Medium</option>
+            <option value="High">High</option>
+        </select>
+    </div>
+    <button onclick="addTask()">Add Task</button>
+
+    <ul id="taskList"></ul>
+
+    <script>
+        function addTask() {
+            let taskName = document.getElementById("taskInput").value.trim();
+            let description = document.getElementById("descriptionInput").value.trim();
+            let deadline = document.getElementById("deadlineInput").value;
+            let priority = document.getElementById("priorityInput").value;
+
+            if (taskName) {
+                // Calculate days left before deadline
+                let daysLeft = calculateDaysLeft(deadline);
+
+                let li = document.createElement("li");
+                li.className = "task";
+
+                let taskNameElem = document.createElement("div");
+                taskNameElem.className = "task-details";
+                taskNameElem.innerHTML = `<strong>Task:</strong> ${taskName}`;
+
+                let descriptionElem = document.createElement("div");
+                descriptionElem.className = "task-details";
+                descriptionElem.innerHTML = `<strong>Description:</strong> ${description}`;
+
+                let deadlineElem = document.createElement("div");
+                deadlineElem.className = "task-details";
+                deadlineElem.innerHTML = `<strong>Deadline:</strong> ${deadline || "No deadline set"}`;
+
+                let daysLeftElem = document.createElement("div");
+                daysLeftElem.className = "task-details";
+                daysLeftElem.innerHTML = `<strong>Days Left:</strong> ${daysLeft}`;
+
+                let priorityElem = document.createElement("div");
+                priorityElem.className = "task-details";
+                priorityElem.innerHTML = `<strong>Priority:</strong> ${priority}`;
+
+                let deleteButton = document.createElement("button");
+                deleteButton.textContent = "Delete";
+                deleteButton.className = "delete-button";
+                deleteButton.onclick = function() {
+                    li.remove();
+                };
+
+                li.appendChild(taskNameElem);
+                li.appendChild(descriptionElem);
+                li.appendChild(deadlineElem);
+                li.appendChild(daysLeftElem);
+                li.appendChild(priorityElem);
+                li.appendChild(deleteButton);
+
+                document.getElementById("taskList").appendChild(li);
+
+                document.getElementById("taskInput").value = "";
+                document.getElementById("descriptionInput").value = "";
+                document.getElementById("deadlineInput").value = "";
+                document.getElementById("priorityInput").value = "Low";
+            } else {
+                alert("Please enter a task name.");
+            }
+        }
+
+        function calculateDaysLeft(deadline) {
+            if (!deadline) return "No deadline set";
+
+            let deadlineDate = new Date(deadline);
+            let currentDate = new Date();
+            let timeDiff = deadlineDate - currentDate;
+
+            if (timeDiff < 0) {
+                return "Deadline passed";
+            }
+
+            let daysLeft = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+            return daysLeft + " days";
+        }
+    </script>
+
+</body>
+</html>
